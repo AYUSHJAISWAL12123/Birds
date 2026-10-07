@@ -5,9 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Balcony Birds</title>
 <style>
-:root{--bg:#96bede;--ink:#142d42;--mute:#476e8f;--card:#eef5fa;--line:#75a4c9;--acc:#d96c14;}
+:root{
+  --bg:#96bede;
+  --ink:#102638;
+  --mute:#3b5c7a;
+  --card:#102638;
+  --card-ink:#e8f4fc;
+  --card-mute:#8eb3d1;
+  --line:#22405c;
+  --acc:#f08a4b;
+}
 @media (prefers-color-scheme:dark){
-  :root{--bg:#12212f;--ink:#daebf7;--mute:#7b9cb8;--card:#1a2e40;--line:#2d4c68;--acc:#f08a4b;}
+  :root{--bg:#12212f;--ink:#daebf7;--mute:#7b9cb8;--card:#0a1520;--card-ink:#daebf7;--card-mute:#7b9cb8;--line:#203a52;--acc:#f08a4b;}
   body{background-image:linear-gradient(to bottom, #0d1b28, #16293a)!important;}
 }
 *{box-sizing:border-box}
@@ -17,22 +26,24 @@ h1{font-size:2.3rem;line-height:1.1;margin:0 0 6px;letter-spacing:-.01em}
 h2{font-size:1.25rem;margin:28px 0 8px}
 p.lead{color:var(--mute);margin:0 0 22px}
 .sans,label,button,select,input,small{font-family:system-ui,-apple-system,Segoe UI,sans-serif}
-form{display:grid;grid-template-columns:1fr 1fr;gap:12px;background:var(--card);border:1px solid var(--line);padding:16px;border-radius:10px}
+form{display:grid;grid-template-columns:1fr 1fr;gap:12px;background:var(--card);color:var(--card-ink);border:1px solid var(--line);padding:16px;border-radius:10px}
 form .full{grid-column:1/-1}
-label{display:flex;flex-direction:column;font-size:.85rem;color:var(--mute);gap:4px}
-select,input{font-size:1rem;padding:9px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink)}
+label{display:flex;flex-direction:column;font-size:.85rem;color:var(--card-mute);gap:4px}
+select,input{font-size:1rem;padding:9px;border:1px solid var(--line);border-radius:6px;background:#0b1824;color:var(--card-ink)}
+@media (prefers-color-scheme:dark) { select,input{background:#050a10;} }
 button{font-size:1rem;padding:11px 16px;border:0;border-radius:6px;background:var(--acc);color:#fff;font-weight:600;cursor:pointer}
-button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--ink)}
 button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
-.bird{background:var(--card);border:1px solid var(--line);border-left:6px solid var(--acc);border-radius:8px;padding:14px 16px;margin:12px 0}
+.bird{background:var(--card);color:var(--card-ink);border:1px solid var(--line);border-left:6px solid var(--acc);border-radius:8px;padding:14px 16px;margin:12px 0}
 .bird h3{margin:0;font-size:1.15rem}
-.bird .sci{color:var(--mute);font-style:italic;font-size:.9rem}
+.bird .sci{color:var(--card-mute);font-style:italic;font-size:.9rem}
 table{border-collapse:collapse;width:100%;font-size:.95rem}
 td,th{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
 th{width:34%;color:var(--mute);font-weight:600;font-family:system-ui,sans-serif;font-size:.85rem}
+.bird th { color: var(--card-mute); }
 ul{padding-left:20px;margin:6px 0}
 .note{color:var(--mute);font-size:.88rem}
-#ai{white-space:pre-wrap;background:var(--card);border:1px dashed var(--line);padding:14px;border-radius:8px;display:none}
+#ai{white-space:pre-wrap;background:var(--card);color:var(--card-ink);border:1px dashed var(--line);padding:14px;border-radius:8px;display:none}
 .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
 #out{display:none}
 @media (max-width:560px){form{grid-template-columns:1fr}}
@@ -42,8 +53,8 @@ ul{padding-left:20px;margin:6px 0}
   .bird{break-inside:avoid;background:#fff}
 }
 
-/* Background birds */
-.bg-birds {
+/* Background scene */
+.bg-scene {
   position: fixed;
   top: 0;
   left: 0;
@@ -53,9 +64,26 @@ ul{padding-left:20px;margin:6px 0}
   z-index: -1;
   overflow: hidden;
 }
+.cloud {
+  position: absolute;
+  opacity: 0.5;
+  left: -200px;
+  animation: drift linear infinite;
+}
+.cloud svg { width: 200px; height: 80px; }
+.cloud-1 { top: 15%; animation-duration: 140s; animation-delay: -20s; transform: scale(1.5); }
+.cloud-2 { top: 50%; animation-duration: 110s; animation-delay: -70s; transform: scale(1.2); opacity: 0.3; }
+.cloud-3 { top: 80%; animation-duration: 180s; animation-delay: -10s; transform: scale(2); opacity: 0.4; }
+.cloud-4 { top: 30%; animation-duration: 120s; animation-delay: -90s; transform: scale(0.9); }
+
+@keyframes drift {
+  0% { left: -300px; }
+  100% { left: 110vw; }
+}
+
 .bird-bg {
   position: absolute;
-  opacity: 0.12;
+  opacity: 0.4;
   left: -100px;
   animation: fly linear infinite;
 }
@@ -66,12 +94,18 @@ ul{padding-left:20px;margin:6px 0}
 .bird-bg:nth-child(even) svg { animation-delay: -0.4s; animation-duration: 0.9s; }
 .bird-bg:nth-child(3n) svg { animation-delay: -0.2s; animation-duration: 0.7s; }
 
-.bird-bg:nth-child(1) { top: 15%; animation-duration: 35s; animation-delay: 0s; transform: scale(0.8); }
-.bird-bg:nth-child(2) { top: 40%; animation-duration: 45s; animation-delay: -15s; transform: scale(0.5); }
-.bird-bg:nth-child(3) { top: 65%; animation-duration: 40s; animation-delay: -5s; transform: scale(1); }
-.bird-bg:nth-child(4) { top: 85%; animation-duration: 55s; animation-delay: -25s; transform: scale(0.6); }
-.bird-bg:nth-child(5) { top: 25%; animation-duration: 38s; animation-delay: -10s; transform: scale(0.7); }
-.bird-bg:nth-child(6) { top: 75%; animation-duration: 42s; animation-delay: -30s; transform: scale(0.9); }
+.bird-bg:nth-child(5) { top: 15%; animation-duration: 35s; animation-delay: 0s; transform: scale(0.8); }
+.bird-bg:nth-child(6) { top: 40%; animation-duration: 45s; animation-delay: -15s; transform: scale(0.5); }
+.bird-bg:nth-child(7) { top: 65%; animation-duration: 40s; animation-delay: -5s; transform: scale(1); }
+.bird-bg:nth-child(8) { top: 85%; animation-duration: 55s; animation-delay: -25s; transform: scale(0.6); }
+.bird-bg:nth-child(9) { top: 25%; animation-duration: 38s; animation-delay: -10s; transform: scale(0.7); }
+.bird-bg:nth-child(10) { top: 75%; animation-duration: 42s; animation-delay: -30s; transform: scale(0.9); }
+.bird-bg:nth-child(11) { top: 10%; animation-duration: 48s; animation-delay: -2s; transform: scale(0.4); }
+.bird-bg:nth-child(12) { top: 55%; animation-duration: 33s; animation-delay: -18s; transform: scale(0.75); }
+.bird-bg:nth-child(13) { top: 35%; animation-duration: 50s; animation-delay: -8s; transform: scale(0.55); }
+.bird-bg:nth-child(14) { top: 90%; animation-duration: 60s; animation-delay: -40s; transform: scale(0.85); }
+.bird-bg:nth-child(15) { top: 20%; animation-duration: 37s; animation-delay: -22s; transform: scale(0.65); }
+.bird-bg:nth-child(16) { top: 70%; animation-duration: 44s; animation-delay: -12s; transform: scale(1.1); }
 
 @keyframes fly {
   0% { left: -100px; margin-top: 0; }
@@ -85,12 +119,22 @@ ul{padding-left:20px;margin:6px 0}
   100% { transform: scaleY(0.3); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .bg-birds { display: none; }
+  .bg-scene { display: none; }
 }
 </style>
 </head>
 <body>
-<div class="bg-birds" aria-hidden="true">
+<div class="bg-scene" aria-hidden="true">
+  <div class="cloud cloud-1"><svg viewBox="0 0 100 40"><path d="M 20 20 Q 30 10 40 20 Q 55 5 70 20 Q 80 15 90 25 Q 100 35 80 35 L 20 35 Q 0 35 10 25 Q 0 15 20 20 Z" fill="#fff" /></svg></div>
+  <div class="cloud cloud-2"><svg viewBox="0 0 100 40"><path d="M 20 20 Q 30 10 40 20 Q 55 5 70 20 Q 80 15 90 25 Q 100 35 80 35 L 20 35 Q 0 35 10 25 Q 0 15 20 20 Z" fill="#fff" /></svg></div>
+  <div class="cloud cloud-3"><svg viewBox="0 0 100 40"><path d="M 20 20 Q 30 10 40 20 Q 55 5 70 20 Q 80 15 90 25 Q 100 35 80 35 L 20 35 Q 0 35 10 25 Q 0 15 20 20 Z" fill="#fff" /></svg></div>
+  <div class="cloud cloud-4"><svg viewBox="0 0 100 40"><path d="M 20 20 Q 30 10 40 20 Q 55 5 70 20 Q 80 15 90 25 Q 100 35 80 35 L 20 35 Q 0 35 10 25 Q 0 15 20 20 Z" fill="#fff" /></svg></div>
+  <div class="bird-bg"><svg width="40" height="20" viewBox="0 0 40 20"><path d="M 0 10 Q 10 0 20 10 Q 30 0 40 10 Q 30 5 20 15 Q 10 5 0 10 Z" /></svg></div>
+  <div class="bird-bg"><svg width="40" height="20" viewBox="0 0 40 20"><path d="M 0 10 Q 10 0 20 10 Q 30 0 40 10 Q 30 5 20 15 Q 10 5 0 10 Z" /></svg></div>
+  <div class="bird-bg"><svg width="40" height="20" viewBox="0 0 40 20"><path d="M 0 10 Q 10 0 20 10 Q 30 0 40 10 Q 30 5 20 15 Q 10 5 0 10 Z" /></svg></div>
+  <div class="bird-bg"><svg width="40" height="20" viewBox="0 0 40 20"><path d="M 0 10 Q 10 0 20 10 Q 30 0 40 10 Q 30 5 20 15 Q 10 5 0 10 Z" /></svg></div>
+  <div class="bird-bg"><svg width="40" height="20" viewBox="0 0 40 20"><path d="M 0 10 Q 10 0 20 10 Q 30 0 40 10 Q 30 5 20 15 Q 10 5 0 10 Z" /></svg></div>
+  <div class="bird-bg"><svg width="40" height="20" viewBox="0 0 40 20"><path d="M 0 10 Q 10 0 20 10 Q 30 0 40 10 Q 30 5 20 15 Q 10 5 0 10 Z" /></svg></div>
   <div class="bird-bg"><svg width="40" height="20" viewBox="0 0 40 20"><path d="M 0 10 Q 10 0 20 10 Q 30 0 40 10 Q 30 5 20 15 Q 10 5 0 10 Z" /></svg></div>
   <div class="bird-bg"><svg width="40" height="20" viewBox="0 0 40 20"><path d="M 0 10 Q 10 0 20 10 Q 30 0 40 10 Q 30 5 20 15 Q 10 5 0 10 Z" /></svg></div>
   <div class="bird-bg"><svg width="40" height="20" viewBox="0 0 40 20"><path d="M 0 10 Q 10 0 20 10 Q 30 0 40 10 Q 30 5 20 15 Q 10 5 0 10 Z" /></svg></div>
