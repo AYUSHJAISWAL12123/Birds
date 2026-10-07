@@ -5,10 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Balcony Birds</title>
 <style>
-:root{--bg:#e6ede1;--ink:#1d3527;--mute:#55695b;--card:#f6f9f3;--line:#bccdb9;--acc:#c9560c;}
-@media (prefers-color-scheme:dark){:root{--bg:#16221a;--ink:#e3ecde;--mute:#9bb0a0;--card:#1e2e23;--line:#34493b;--acc:#f08a4b;}}
+:root{--bg:#96bede;--ink:#142d42;--mute:#476e8f;--card:#eef5fa;--line:#75a4c9;--acc:#d96c14;}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#12212f;--ink:#daebf7;--mute:#7b9cb8;--card:#1a2e40;--line:#2d4c68;--acc:#f08a4b;}
+  body{background-image:linear-gradient(to bottom, #0d1b28, #16293a)!important;}
+}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 Charter,Georgia,serif}
+body{margin:0;background:var(--bg);background-image:linear-gradient(to bottom, #7baed4, #b2d3eb);background-attachment:fixed;color:var(--ink);font:17px/1.55 Charter,Georgia,serif;position:relative;overflow-x:hidden}
 main{max-width:760px;margin:0 auto;padding:28px 18px 60px}
 h1{font-size:2.3rem;line-height:1.1;margin:0 0 6px;letter-spacing:-.01em}
 h2{font-size:1.25rem;margin:28px 0 8px}
@@ -17,7 +20,7 @@ p.lead{color:var(--mute);margin:0 0 22px}
 form{display:grid;grid-template-columns:1fr 1fr;gap:12px;background:var(--card);border:1px solid var(--line);padding:16px;border-radius:10px}
 form .full{grid-column:1/-1}
 label{display:flex;flex-direction:column;font-size:.85rem;color:var(--mute);gap:4px}
-select,input{font-size:1rem;padding:9px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+select,input{font-size:1rem;padding:9px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink)}
 button{font-size:1rem;padding:11px 16px;border:0;border-radius:6px;background:var(--acc);color:#fff;font-weight:600;cursor:pointer}
 button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
 button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
