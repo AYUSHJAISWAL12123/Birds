@@ -33,10 +33,68 @@ ul{padding-left:20px;margin:6px 0}
 .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
 #out{display:none}
 @media (max-width:560px){form{grid-template-columns:1fr}}
-@media print{form,.actions,#aisetup,.noprint{display:none!important}body{background:#fff;color:#000}.bird{break-inside:avoid;background:#fff}}
+@media print{
+  form,.actions,#aisetup,.noprint,.bg-birds{display:none!important}
+  body{background:#fff;color:#000}
+  .bird{break-inside:avoid;background:#fff}
+}
+
+/* Background birds */
+.bg-birds {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: -1;
+  overflow: hidden;
+}
+.bird-bg {
+  position: absolute;
+  opacity: 0.12;
+  left: -100px;
+  animation: fly linear infinite;
+}
+.bird-bg svg {
+  fill: var(--ink);
+  animation: flap 0.8s ease-in-out infinite alternate;
+}
+.bird-bg:nth-child(even) svg { animation-delay: -0.4s; animation-duration: 0.9s; }
+.bird-bg:nth-child(3n) svg { animation-delay: -0.2s; animation-duration: 0.7s; }
+
+.bird-bg:nth-child(1) { top: 15%; animation-duration: 35s; animation-delay: 0s; transform: scale(0.8); }
+.bird-bg:nth-child(2) { top: 40%; animation-duration: 45s; animation-delay: -15s; transform: scale(0.5); }
+.bird-bg:nth-child(3) { top: 65%; animation-duration: 40s; animation-delay: -5s; transform: scale(1); }
+.bird-bg:nth-child(4) { top: 85%; animation-duration: 55s; animation-delay: -25s; transform: scale(0.6); }
+.bird-bg:nth-child(5) { top: 25%; animation-duration: 38s; animation-delay: -10s; transform: scale(0.7); }
+.bird-bg:nth-child(6) { top: 75%; animation-duration: 42s; animation-delay: -30s; transform: scale(0.9); }
+
+@keyframes fly {
+  0% { left: -100px; margin-top: 0; }
+  25% { margin-top: -30px; }
+  50% { margin-top: 20px; }
+  75% { margin-top: -20px; }
+  100% { left: 110vw; margin-top: 0; }
+}
+@keyframes flap {
+  0% { transform: scaleY(1); }
+  100% { transform: scaleY(0.3); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bg-birds { display: none; }
+}
 </style>
 </head>
 <body>
+<div class="bg-birds" aria-hidden="true">
+  <div class="bird-bg"><svg width="40" height="20" viewBox="0 0 40 20"><path d="M 0 10 Q 10 0 20 10 Q 30 0 40 10 Q 30 5 20 15 Q 10 5 0 10 Z" /></svg></div>
+  <div class="bird-bg"><svg width="40" height="20" viewBox="0 0 40 20"><path d="M 0 10 Q 10 0 20 10 Q 30 0 40 10 Q 30 5 20 15 Q 10 5 0 10 Z" /></svg></div>
+  <div class="bird-bg"><svg width="40" height="20" viewBox="0 0 40 20"><path d="M 0 10 Q 10 0 20 10 Q 30 0 40 10 Q 30 5 20 15 Q 10 5 0 10 Z" /></svg></div>
+  <div class="bird-bg"><svg width="40" height="20" viewBox="0 0 40 20"><path d="M 0 10 Q 10 0 20 10 Q 30 0 40 10 Q 30 5 20 15 Q 10 5 0 10 Z" /></svg></div>
+  <div class="bird-bg"><svg width="40" height="20" viewBox="0 0 40 20"><path d="M 0 10 Q 10 0 20 10 Q 30 0 40 10 Q 30 5 20 15 Q 10 5 0 10 Z" /></svg></div>
+  <div class="bird-bg"><svg width="40" height="20" viewBox="0 0 40 20"><path d="M 0 10 Q 10 0 20 10 Q 30 0 40 10 Q 30 5 20 15 Q 10 5 0 10 Z" /></svg></div>
+</div>
 <main>
 <h1>Balcony Birds</h1>
 <p class="lead">Tell it where you live and what space you have. It works out the season, which birds can realistically visit, what to plant in pots for them, and what box to build. Then print the sheet and go outside.</p>
