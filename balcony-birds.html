@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Balcony Birds</title>
+<style>
+:root{--bg:#e6ede1;--ink:#1d3527;--mute:#55695b;--card:#f6f9f3;--line:#bccdb9;--acc:#c9560c;}
+@media (prefers-color-scheme:dark){:root{--bg:#16221a;--ink:#e3ecde;--mute:#9bb0a0;--card:#1e2e23;--line:#34493b;--acc:#f08a4b;}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 Charter,Georgia,serif}
+main{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+h1{font-size:2.3rem;line-height:1.1;margin:0 0 6px;letter-spacing:-.01em}
+h2{font-size:1.25rem;margin:28px 0 8px}
+p.lead{color:var(--mute);margin:0 0 22px}
+.sans,label,button,select,input,small{font-family:system-ui,-apple-system,Segoe UI,sans-serif}
+form{display:grid;grid-template-columns:1fr 1fr;gap:12px;background:var(--card);border:1px solid var(--line);padding:16px;border-radius:10px}
+form .full{grid-column:1/-1}
+label{display:flex;flex-direction:column;font-size:.85rem;color:var(--mute);gap:4px}
+select,input{font-size:1rem;padding:9px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+button{font-size:1rem;padding:11px 16px;border:0;border-radius:6px;background:var(--acc);color:#fff;font-weight:600;cursor:pointer}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.bird{background:var(--card);border:1px solid var(--line);border-left:6px solid var(--acc);border-radius:8px;padding:14px 16px;margin:12px 0}
+.bird h3{margin:0;font-size:1.15rem}
+.bird .sci{color:var(--mute);font-style:italic;font-size:.9rem}
+table{border-collapse:collapse;width:100%;font-size:.95rem}
+td,th{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+th{width:34%;color:var(--mute);font-weight:600;font-family:system-ui,sans-serif;font-size:.85rem}
+ul{padding-left:20px;margin:6px 0}
+.note{color:var(--mute);font-size:.88rem}
+#ai{white-space:pre-wrap;background:var(--card);border:1px dashed var(--line);padding:14px;border-radius:8px;display:none}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+#out{display:none}
+@media (max-width:560px){form{grid-template-columns:1fr}}
+@media print{form,.actions,#aisetup,.noprint{display:none!important}body{background:#fff;color:#000}.bird{break-inside:avoid;background:#fff}}
+</style>
+</head>
+<body>
+<main>
+<h1>Balcony Birds</h1>
+<p class="lead">Tell it where you live and what space you have. It works out the season, which birds can realistically visit, what to plant in pots for them, and what box to build. Then print the sheet and go outside.</p>
+
+<form id="f" class="sans">
+  <label>Region
+    <select id="region"></select>
+  </label>
+  <label>Balcony sunlight
+    <select id="sun">
+      <option value="full">Full sun (5+ hours)</option>
+      <option value="part" selected>Part sun (3 to 5 hours)</option>
+      <option value="shade">Mostly shade</option>
+    </select>
+  </label>
+  <label>Space for pots
+    <select id="space">
+      <option value="s">Small (3 to 4 pots)</option>
+      <option value="m" selected>Medium (6 to 8 pots)</option>
+      <option value="l">Large (10+ pots)</option>
+    </select>
+  </label>
+  <label>Floor you can put a box on
+    <select id="height">
+      <option value="low">Ground or 1st floor</option>
+      <option value="mid" selected>2nd to 4th floor</option>
+      <option value="high">5th floor or higher</option>
+    </select>
+  </label>
+  <label class="full">Date (used to find the season)
+    <input type="date" id="date">
+  </label>
+  <div class="full actions" style="margin:0">
+    <button type="submit">Plan my balcony</button>
+  </div>
+</form>
+
+<div id="out">
+  <h2 id="seasonTitle"></h2>
+  <p id="seasonText" class="note"></p>
+
+  <h2>Birds that can visit this season</h2>
+  <div id="birds"></div>
+
+  <h2>What to plant in pots</h2>
+  <div id="plants"></div>
+
+  <h2>Water and cover</h2>
+  <ul>
+    <li>A shallow dish, 3 to 4 cm deep, with a flat stone in the middle so small birds can stand. Refill daily and scrub it weekly so it does not breed mosquitoes.</li>
+    <li>Keep the dish about 1 to 2 metres from your densest plant so birds have cover to dash into.</li>
+    <li>Skip pesticides on this balcony. Parents feed chicks on insects, and sprays remove them.</li>
+  </ul>
+
+  <h2>Your week</h2>
+  <ul id="todo"></ul>
+
+  <div class="actions noprint">
+    <button id="print">Print the sheet</button>
+    <button id="aibtn" class="ghost">Explain it with my local AI</button>
+  </div>
+  <div id="aisetup" class="noprint" style="margin-top:14px">
+    <p class="note">Optional. Runs an open-weight model on your own computer through Ollama, so nothing leaves it. Install Ollama, run <b>ollama pull qwen3:4b</b> (or any model you like), and start it with <b>OLLAMA_ORIGINS="*" ollama serve</b>. The model only explains the plan below. It does not add facts.</p>
+    <label class="sans" style="max-width:280px">Model name <input id="model" value="qwen3:4b"></label>
+  </div>
+  <div id="ai" class="noprint" style="margin-top:12px"></div>
+  <p class="note" style="margin-top:24px">Box sizes and sowing windows in this file are approximate starting points, drawn from general field guidance. Check them against a local source such as your regional bird society or nursery before cutting wood. The tables are plain JavaScript at the top of the script, so you can edit them for your area.</p>
+</div>
+</main>
+
+<script>
+// ---------- EDITABLE DATA ----------
+// Seasons by region (month numbers 1-12)
+const REGIONS = {
+  central: {name:"Central India (Vidarbha, Madhya Pradesh)", seasons:[
+    {n:"Winter",m:[12,1,2],t:"Cool, dry mornings. Many birds feed hard and look for roost spots."},
+    {n:"Summer",m:[3,4,5],t:"Hot and dry. Water matters most now, and nesting is at its peak for many species."},
+    {n:"Monsoon",m:[6,7,8,9],t:"Rain and new growth. Best time to sow and plant. Insects boom, so parents feed chicks well."},
+    {n:"Post-monsoon",m:[10,11],t:"Clearing skies and fresh seed heads. A good window for planting and cleaning boxes."}]},
+  north: {name:"North India plains (Delhi, Punjab, UP)", seasons:[
+    {n:"Winter",m:[12,1,2],t:"Cold and foggy. Food and water help birds through the cold."},
+    {n:"Spring",m:[3,4],t:"Warming up. Nesting begins and many plants start flowering."},
+    {n:"Summer",m:[5,6],t:"Very hot. Shade and daily fresh water are essential."},
+    {n:"Monsoon",m:[7,8,9],t:"Humid and green. Best time to sow and plant."},
+    {n:"Post-monsoon",m:[10,11],t:"Dry and pleasant. Good for planting and box maintenance."}]},
+  south: {name:"South India (Bengaluru, Chennai, Hyderabad)", seasons:[
+    {n:"Winter",m:[12,1,2],t:"Mild and dry. Steady feeding season."},
+    {n:"Summer",m:[3,4,5],t:"Warm to hot. Nesting season, keep water filled."},
+    {n:"Southwest monsoon",m:[6,7,8,9],t:"Rain and growth. Good for sowing and planting."},
+    {n:"Northeast monsoon",m:[10,11],t:"More rain in the east and south. Plants establish quickly."}]},
+  west: {name:"Western coast (Mumbai, Pune, Goa)", seasons:[
+    {n:"Winter",m:[12,1,2],t:"Dry and mild. Steady feeding season."},
+    {n:"Summer",m:[3,4,5],t:"Hot and humid. Nesting season, keep water filled."},
+    {n:"Monsoon",m:[6,7,8,9],t:"Heavy rain. Plant early, and keep boxes sheltered from driving rain."},
+    {n:"Post-monsoon",m:[10,11],t:"Clearing and warm. Good window for planting."}]}
+};
+
+// Birds. nest: "box" | "shrub" | "hang". box dims in cm (approximate).
+const BIRDS = [
+  {id:"sparrow",name:"House Sparrow",sci:"Passer domesticus",regions:["central","north","south","west"],breed:[3,4,5,6,7,8],
+    nest:"box",hole:"3.2 to 3.5",floor:"12 x 12",depth:"20",hang:"3 to 6 m (any balcony level)",
+    needs:["seeds","insects"],likes:["millet","zinnia","marigold","tulsi"],
+    tip:"Mounts under a roof or balcony ceiling, facing away from afternoon sun and driving rain. Likes company, so hang two boxes side by side.",
+    build:"Plank 15 to 18 mm thick, sloped hinged roof, 4 or 5 drainage holes in the floor, no perch (perches help predators)."},
+  {id:"magpie",name:"Oriental Magpie-Robin",sci:"Copsychus saularis",regions:["central","north","south","west"],breed:[3,4,5,6,7],
+    nest:"box",hole:"5 (or an open-fronted box)",floor:"15 x 15",depth:"22",hang:"2 to 4 m, in shade",
+    needs:["insects"],likes:["curry","ixora","tulsi","jasmine"],
+    tip:"Prefers a sheltered spot with shade and some foliage nearby. An open-fronted box tucked under a ledge often works better than a small round hole.",
+    build:"Same plank construction as above, front cut to leave a 5 cm gap at the top, rain-proof roof overhang of 5 cm."},
+  {id:"myna",name:"Common Myna",sci:"Acridotheres tristis",regions:["central","north","south","west"],breed:[3,4,5,6,7,8],
+    nest:"box",hole:"6 to 7",floor:"18 x 18",depth:"25",hang:"3 to 6 m",
+    needs:["insects","fruit"],likes:["papaya","curry","millet"],
+    tip:"Bold and noisy and happy near people. Large box needs a solid bracket, since it gets heavy with nesting material.",
+    build:"Thicker 20 mm plank, strong bracket, drainage holes. Clean out each year because mynas reuse and stuff boxes."},
+  {id:"bulbul",name:"Red-vented Bulbul",sci:"Pycnonotus cafer",regions:["central","north","south","west"],breed:[2,3,4,5,6,7,8,9],
+    nest:"shrub",needs:["fruit","insects"],likes:["curry","papaya","jasmine","ixora"],
+    tip:"Does not use boxes. It builds an open cup in a dense shrub, so the most useful thing you can offer is a thick, bushy pot plant at about eye level, left unpruned in breeding months.",
+    build:"No box. Provide a bushy plant in a 30 to 40 cm pot, such as jasmine or curry leaf."},
+  {id:"sunbird",name:"Purple Sunbird",sci:"Cinnyris asiaticus",regions:["central","north","south","west"],breed:[2,3,4,5,6],
+    nest:"hang",needs:["nectar","insects"],likes:["hibiscus","ixora","lantana","marigold"],
+    tip:"Does not use boxes. It weaves a small hanging nest from fine fibres and cobweb, often from a twig or a balcony wire. Flowers are the draw: keep nectar plants blooming through summer.",
+    build:"No box. Leave some loose cotton fibre or fine dry grass in a tray, and avoid trimming hanging creepers or wires near the plants."},
+  {id:"parakeet",name:"Rose-ringed Parakeet",sci:"Psittacula krameri",regions:["central","north","south","west"],breed:[1,2,3,4],
+    nest:"box",hole:"6 to 7",floor:"20 x 20",depth:"35",hang:"4 m or higher",
+    needs:["seeds","fruit"],likes:["millet","papaya","zinnia"],
+    tip:"Needs a tall, deep box well above ground, and often prefers a real tree hole. Best on higher floors, and early in the year.",
+    build:"Thick 25 mm plank, deep cavity, strong bracket, 20 cm of wood shavings inside."},
+  {id:"tailor",name:"Common Tailorbird",sci:"Orthotomus sutorius",regions:["central","north","south","west"],breed:[4,5,6,7,8,9],
+    nest:"shrub",needs:["insects"],likes:["curry","hibiscus","ixora","tulsi"],
+    tip:"Does not use boxes. It stitches a cradle from large living leaves, so plants with broad, soft leaves in a bushy pot give it nest material and insects.",
+    build:"No box. Offer a large-leaved shrub such as hibiscus, and keep a little cotton thread out of your balcony (loose thread can tangle feet)."}
+];
+
+// Plants for pots. sow: months to plant/sow in each region group (kept simple, editable).
+const PLANTS = {
+  millet:{name:"Foxtail or pearl millet (bajra)",why:"Seed heads feed sparrows and parakeets after flowering.",pot:"Wide 30 cm pot",sun:["full","part"],sow:{central:[6,7],north:[7],south:[6,7,10],west:[6,7]},bird:["seeds"]},
+  zinnia:{name:"Zinnia",why:"Attracts insects while in flower, then gives seeds for finches and sparrows.",pot:"25 cm pot",sun:["full","part"],sow:{central:[6,7,10,11],north:[3,7],south:[6,7,10],west:[6,7,10]},bird:["seeds","insects"]},
+  marigold:{name:"Marigold",why:"Easy flower for insects and later seeds. Dwarf varieties suit small pots.",pot:"20 to 25 cm pot",sun:["full","part"],sow:{central:[6,10,11],north:[7,9],south:[6,10],west:[6,10]},bird:["insects","nectar","seeds"]},
+  tulsi:{name:"Tulsi (holy basil)",why:"Seeds and insects around the flowers. Hardy and almost impossible to fail.",pot:"25 cm pot",sun:["full","part"],sow:{central:[2,3,6,7],north:[3,4,7],south:[2,3,6],west:[2,3,6]},bird:["insects","seeds"]},
+  hibiscus:{name:"Hibiscus",why:"Nectar for sunbirds and broad leaves for tailorbirds. Needs a big pot.",pot:"40 cm pot",sun:["full","part"],sow:{central:[6,7,8],north:[7,8],south:[6,7,8],west:[6,7,8]},bird:["nectar","insects"]},
+  ixora:{name:"Ixora",why:"Year-round clusters of flowers for nectar and insects, plus dense foliage for cover.",pot:"35 cm pot",sun:["full","part"],sow:{central:[6,7,8],north:[7,8],south:[6,7,8],west:[6,7,8]},bird:["nectar","insects"]},
+  lantana:{name:"Lantana (non-invasive dwarf cultivar)",why:"Nectar and small berries. Wild lantana is invasive in India, so ask the nursery for a sterile dwarf type and never plant it out in open ground.",pot:"30 cm pot",sun:["full"],sow:{central:[6,7],north:[7],south:[6,7],west:[6,7]},bird:["nectar","fruit"]},
+  curry:{name:"Curry leaf",why:"Insects on the leaves, small berries for bulbuls and mynas, and a bushy shape that gives cover.",pot:"45 cm pot",sun:["full","part"],sow:{central:[6,7,8],north:[7,8],south:[6,7,8],west:[6,7,8]},bird:["insects","fruit"]},
+  papaya:{name:"Papaya (dwarf)",why:"Ripe fruit draws bulbuls and mynas. Needs a large pot and full sun.",pot:"50 cm pot or bigger",sun:["full"],sow:{central:[6,7],north:[7],south:[6,7,10],west:[6,7]},bird:["fruit"]},
+  jasmine:{name:"Jasmine",why:"Dense, climbing cover that bulbuls and magpie-robins use to hide and sometimes nest in.",pot:"35 cm pot with a trellis",sun:["full","part"],sow:{central:[6,7,8],north:[7,8],south:[6,7,8],west:[6,7,8]},bird:["cover"]}
+};
+// ---------- END DATA ----------
+
+const $=id=>document.getElementById(id);
+const monthNames=["","January","February","March","April","May","June","July","August","September","October","November","December"];
+const sel=$("region");
+for(const k in REGIONS){const o=document.createElement("option");o.value=k;o.textContent=REGIONS[k].name;sel.appendChild(o)}
+$("date").valueAsDate=new Date();
+let lastPlanText="";
+
+$("f").addEventListener("submit",e=>{e.preventDefault();plan()});
+$("print").onclick=()=>window.print();
+
+function plan(){
+  const reg=sel.value, R=REGIONS[reg];
+  const d=$("date").valueAsDate||new Date(), month=d.getMonth()+1;
+  const sun=$("sun").value, space=$("space").value, floor=$("height").value;
+  const season=R.seasons.find(s=>s.m.includes(month));
+  $("seasonTitle").textContent=season.n+" in "+R.name.split(" (")[0]+", "+monthNames[month];
+  $("seasonText").textContent=season.t;
+
+  // birds: in this region, and either breeding now or within the next 2 months
+  const soon=[month,month%12+1,(month+1)%12+1];
+  let candidates=BIRDS.filter(b=>b.regions.includes(reg)&&b.breed.some(m=>soon.includes(m)));
+  if(floor!=="high"&&floor!=="mid") candidates=candidates.filter(b=>b.id!=="parakeet");
+  if(floor==="low") candidates=candidates.filter(b=>b.id!=="parakeet"&&b.id!=="myna");
+  if(floor==="high") candidates=candidates.filter(b=>b.id!=="magpie");
+  const maxBirds={s:2,m:3,l:4}[space];
+  candidates=candidates.slice(0,maxBirds+1);
+
+  // plants: sunlight match, ranked by how many chosen birds like them
+  const likes={};
+  candidates.forEach(b=>b.likes.forEach(p=>likes[p]=(likes[p]||0)+1));
+  const maxPots={s:4,m:7,l:10}[space];
+  let plants=Object.keys(PLANTS).filter(k=>PLANTS[k].sun.includes(sun)&&likes[k])
+    .sort((a,b)=>likes[b]-likes[a]).slice(0,maxPots);
+
+  // birds html
+  const bh=$("birds"); bh.innerHTML="";
+  if(!candidates.length){bh.innerHTML="<p>No birds in the table match this season and floor. Edit the BIRDS list at the top of the file to add more.</p>"}
+  candidates.forEach(b=>{
+    const div=document.createElement("div");div.className="bird";
+    const breeding=b.breed.includes(month)?"Breeding now":"Breeding starts soon";
+    let box;
+    if(b.nest==="box"){
+      box=`<table><tr><th>Entrance hole</th><td>${b.hole} cm</td></tr><tr><th>Floor</th><td>${b.floor} cm</td></tr><tr><th>Inside depth</th><td>${b.depth} cm</td></tr><tr><th>Mounting height</th><td>${b.hang}</td></tr><tr><th>How to build</th><td>${b.build}</td></tr></table>`;
+    } else {
+      box=`<table><tr><th>Nest style</th><td>${b.nest==="shrub"?"Open cup in a dense shrub":"Hanging woven nest"}</td></tr><tr><th>What to do</th><td>${b.build}</td></tr></table>`;
+    }
+    div.innerHTML=`<h3>${b.name}</h3><div class="sci">${b.sci} · ${breeding}</div><p>${b.tip}</p>${box}`;
+    bh.appendChild(div);
+  });
+
+  // plants html
+  const ph=$("plants");
+  if(!plants.length){ph.innerHTML="<p>No matching plants for this much shade. Try mint, curry leaf or jasmine, which tolerate part shade, and edit the PLANTS table.</p>"}
+  else{
+    let rows="";
+    plants.forEach(k=>{
+      const p=PLANTS[k], w=p.sow[reg]||[];
+      const when=w.includes(month)?"Plant now":(w.length?"Best in "+w.map(m=>monthNames[m].slice(0,3)).join(", "):"Check locally");
+      rows+=`<tr><td><b>${p.name}</b><br><span class="note">${p.why}</span></td><td>${p.pot}</td><td>${when}</td></tr>`;
+    });
+    ph.innerHTML=`<table><tr><th style="width:auto">Plant</th><th style="width:auto">Container</th><th style="width:auto">Timing</th></tr>${rows}</table>`;
+  }
+
+  // todo
+  const todo=$("todo");todo.innerHTML="";
+  const items=[];
+  const nowPlant=plants.filter(k=>(PLANTS[k].sow[reg]||[]).includes(month)).map(k=>PLANTS[k].name);
+  if(nowPlant.length)items.push("Buy and pot: "+nowPlant.join(", ")+".");
+  else items.push("It is not the best month to sow most of these. Buy established plants from a nursery, or prepare pots and soil for the next window.");
+  const boxBirds=candidates.filter(b=>b.nest==="box");
+  if(boxBirds.length)items.push("Build one box for "+boxBirds[0].name+" and hang it this week, before nesting starts or while it is still early.");
+  items.push("Put out the water dish and fill it every morning.");
+  items.push("Sit on the balcony for 10 minutes at dawn or dusk on two days this week and note which birds come.");
+  items.push("In two weeks, look at the box from a distance. Do not open it while birds are nesting.");
+  items.forEach(t=>{const li=document.createElement("li");li.textContent=t;todo.appendChild(li)});
+
+  lastPlanText=`Region: ${R.name}. Date: ${monthNames[month]}. Season: ${season.n}. Sunlight: ${sun}. Pots: ${space}. Floor: ${floor}.\n`+
+    `Birds: ${candidates.map(b=>b.name+" ("+(b.nest==="box"?"box, hole "+b.hole+" cm, floor "+b.floor+" cm":b.nest)+")").join("; ")}.\n`+
+    `Plants: ${plants.map(k=>PLANTS[k].name).join(", ")}.\nTodo: ${items.join(" ")}`;
+  $("out").style.display="block";
+  $("out").scrollIntoView({behavior:"smooth"});
+}
+
+$("aibtn").onclick=async()=>{
+  const box=$("ai");box.style.display="block";box.textContent="Asking your local model...";
+  const prompt="You are a friendly gardening and birding guide. Using ONLY the plan below, write a short, warm, plain-language explanation for someone about to set up a balcony for birds. Say why each plant helps each bird, and what to do first this week. Do not add new facts, sizes or species. Keep it under 250 words.\n\nPLAN:\n"+lastPlanText;
+  try{
+    const r=await fetch("http://localhost:11434/api/generate",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({model:$("model").value,prompt,stream:false})});
+    if(!r.ok)throw new Error("HTTP "+r.status);
+    const j=await r.json();
+    box.textContent=(j.response||"").replace(/<think>[\s\S]*?<\/think>/g,"").trim();
+  }catch(err){
+    box.textContent="Could not reach Ollama at localhost:11434. Check that it is running with OLLAMA_ORIGINS=\"*\" and that the model name is installed. The plan above works without it.";
+  }
+};
+</script>
+</body>
+</html>
